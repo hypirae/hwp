@@ -6,25 +6,29 @@
 int
 main (void)
 {
-  // initialize the window
+  HWPWINDOW *window = hwpwindow_alloc (1, 20, 0, 0);
+
+  // start draw functions
   hwpwindow_init ();
 
-  // allocate a new window
-  HWPWINDOW *window = hwpwindow_alloc (10, 10, 0, 0);
+  hwpbuffer_append (window->shadow, "Hello, World!", 13);
+  hwpwindow_flip (window);
+  hwpwindow_paint (window);
 
-  // add some text to the window and shadow buffer
-  hwpbuffer_append (window->buffer, "Hello, World!", 13);
+  getch ();
+
+  hwpbuffer_clear (window->shadow);
   hwpbuffer_append (window->shadow, "Goodbye, World!", 15);
+  hwpwindow_flip (window);
+  hwpwindow_paint (window);
 
-  // print the window and shadow buffer
-  printf ("Window Buffer:\n%s\n\n", window->buffer->data);
-  printf ("Shadow Buffer:\n%s\n", window->shadow->data);
+  getch ();
 
-  // deallocate the window
-  hwpwindow_dealloc (window);
-
-  // deinitialize the window
+  // end draw functions
   hwpwindow_deinit ();
+
+  // cleanup
+  hwpwindow_dealloc (window);
 
   return EXIT_SUCCESS;
 }

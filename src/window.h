@@ -26,13 +26,15 @@ typedef struct hwp_window
   short width;
   short x;
   short y;
-  HWPBUFFER *buffer;
+  HWPBUFFER *current;
   HWPBUFFER *shadow;
 } HWPWINDOW;
 
 // forward declarations
 HWPWINDOW *hwpwindow_alloc (short height, short width, short x, short y);
 void hwpwindow_dealloc (HWPWINDOW *window);
+void hwpwindow_flip (HWPWINDOW *window);
+void hwpwindow_paint (HWPWINDOW *window);
 
 // these functions set up the terminal through ncurses
 void hwpwindow_init (void);
@@ -59,7 +61,7 @@ hwpwindow_alloc (short height, short width, short x, short y)
   window->width = width;
   window->x = x;
   window->y = y;
-  window->buffer = hwpbuffer_alloc (height * width);
+  window->current = hwpbuffer_alloc (height * width);
   window->shadow = hwpbuffer_alloc (height * width);
 
   return window;
@@ -75,9 +77,9 @@ hwpwindow_dealloc (HWPWINDOW *window)
 {
   if (window)
     {
-      if (window->buffer)
+      if (window->current)
         {
-          hwpbuffer_dealloc (window->buffer);
+          hwpbuffer_dealloc (window->current);
         }
 
       if (window->shadow)
@@ -87,6 +89,55 @@ hwpwindow_dealloc (HWPWINDOW *window)
 
       free (window);
     }
+}
+
+/**
+ * hwpwindow_flip: Flip the shadow buffer to the window buffer.
+ *
+ * @param window The window to flip.
+ * 
+ * @note: this function resets the cursor position to the top left corner.
+ * @note: this function copies the updated current buffer to the shadow buffer.
+ */
+void
+hwpwindow_flip (HWPWINDOW *window)
+{
+  HWPBUFFER *temp = window->current;
+
+  window->current = window->shadow;
+  window->shadow = temp;
+  window->x = 0;
+  window->y = 0;
+
+  hwpbuffer_copyInto (window->shadow, window->current);
+}
+
+/**
+ * hwpwindow_paint: Paint the window to the screen.
+ *
+ * @param window The window to paint.
+ */
+void
+hwpwindow_paint (HWPWINDOW *window)
+{
+  for (size_t i = 0; i < window->current->size; i++)
+    {
+      if (window->x >= window->width)
+        {
+          window->x = 0;
+          window->y++;
+        }
+
+      if (window->y >= window->height)
+        {
+          break;
+        }
+
+      mvaddch (window->y, window->x, window->current->data[i]);
+      window->x++;
+    }
+
+  refresh ();
 }
 
 /**

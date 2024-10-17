@@ -23,9 +23,11 @@ typedef struct hwp_buffer
 // forward declarations
 HWPBUFFER *hwpbuffer_alloc (size_t capacity);
 void hwpbuffer_dealloc (HWPBUFFER *buffer);
+void hwpbuffer_clear (HWPBUFFER *buffer);
 HWPBUFFER *hwpbuffer_append (HWPBUFFER *buffer, const char *data, size_t size);
 HWPBUFFER *hwpbuffer_prepend (HWPBUFFER *buffer, const char *data, size_t size);
 char *hwpbuffer_slice (HWPBUFFER *buffer, size_t start, size_t end);
+HWPBUFFER *hwpbuffer_copyInto (HWPBUFFER *dest, HWPBUFFER *src);
 
 /**
  * hwpbuffer_alloc: Allocate a new buffer with the given capacity.
@@ -66,6 +68,19 @@ hwpbuffer_dealloc (HWPBUFFER *buffer)
 
       free (buffer);
     }
+}
+
+/**
+ * hwpbuffer_clear: Clear the buffer.
+ * 
+ * @param buffer The buffer to clear.
+ */
+void
+hwpbuffer_clear (HWPBUFFER *buffer)
+{
+  memset (buffer->data, 0, buffer->capacity);
+
+  buffer->size = 0;
 }
 
 /**
@@ -164,4 +179,36 @@ hwpbuffer_slice (HWPBUFFER *buffer, size_t start, size_t end)
   return slice;
 }
 
+/**
+ * hwpbuffer_copyInto: Copy the source buffer into the destination buffer.
+ * 
+ * @param dest The destination buffer.
+ * @param src The source buffer.
+ * 
+ * @return The destination buffer.
+ */
+HWPBUFFER *
+hwpbuffer_copyInto (HWPBUFFER *dest, HWPBUFFER *src)
+{
+  if (dest->capacity < src->size)
+    {
+      size_t new_capacity = src->size * 2;
+      char *new_data = realloc (dest->data, new_capacity);
+
+      if (new_data)
+        {
+          dest->data = new_data;
+          dest->capacity = new_capacity;
+        }
+      else
+        {
+          return dest;
+        }
+    }
+
+  memcpy (dest->data, src->data, src->size);
+  dest->size = src->size;
+
+  return dest;
+}
 #endif
