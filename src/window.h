@@ -13,8 +13,6 @@
  *
  * @height The height of the window.
  * @width The width of the window.
- * @x The current x coordinate of the cursor.
- * @y The current y coordinate of the cursor.
  * @buffer The buffer of the window.
  * @shadow The shadow buffer of the window.
  *
@@ -24,14 +22,12 @@ typedef struct hwp_window
 {
   short height;
   short width;
-  short x;
-  short y;
   HWPBUFFER *current;
   HWPBUFFER *shadow;
 } HWPWINDOW;
 
 // forward declarations
-HWPWINDOW *hwpwindow_alloc (short height, short width, short x, short y);
+HWPWINDOW *hwpwindow_alloc (short height, short width);
 void hwpwindow_dealloc (HWPWINDOW *window);
 void hwpwindow_flip (HWPWINDOW *window);
 void hwpwindow_paint (HWPWINDOW *window);
@@ -45,22 +41,18 @@ void hwpwindow_deinit (void);
  *
  * @param height The height of the window.
  * @param width The width of the window.
- * @param x current x coordinate of the cursor.
- * @param y current y coordinate of the cursor.
  *
  * @return A pointer to the newly allocated window.
  *
  * @note: the allocated window will have a buffer and shadow buffer.
  */
 HWPWINDOW *
-hwpwindow_alloc (short height, short width, short x, short y)
+hwpwindow_alloc (short height, short width)
 {
   HWPWINDOW *window = malloc (sizeof (HWPWINDOW));
 
   window->height = height;
   window->width = width;
-  window->x = x;
-  window->y = y;
   window->current = hwpbuffer_alloc (height * width);
   window->shadow = hwpbuffer_alloc (height * width);
 
@@ -106,8 +98,6 @@ hwpwindow_flip (HWPWINDOW *window)
 
   window->current = window->shadow;
   window->shadow = temp;
-  window->x = 0;
-  window->y = 0;
 
   hwpbuffer_copyInto (window->shadow, window->current);
 }
@@ -120,21 +110,20 @@ hwpwindow_flip (HWPWINDOW *window)
 void
 hwpwindow_paint (HWPWINDOW *window)
 {
-  for (size_t i = 0; i < window->current->size; i++)
+  int row, col;
+
+  for (row = 0; row < window->height; row++)
     {
-      if (window->x >= window->width)
+      for (col = 0; col < window->width; col++)
         {
-          window->x = 0;
-          window->y++;
+          // ignore null characters
+          if (window->current->data[row * window->width + col] == '\0')
+            {
+              continue;
+            }
+            
+          mvaddch (row, col, window->current->data[row * window->width + col]);
         }
-
-      if (window->y >= window->height)
-        {
-          break;
-        }
-
-      mvaddch (window->y, window->x, window->current->data[i]);
-      window->x++;
     }
 
   refresh ();
