@@ -1,5 +1,7 @@
 add_rules("mode.debug", "mode.release")
 
+add_requires("ncurses")
+
 target("hwp")
     set_kind("binary")
     add_files("src/*.c")
