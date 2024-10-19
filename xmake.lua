@@ -13,32 +13,31 @@ target("hwp")
     -- add include directory src/include
     add_includedirs("src/include")
 
-
     -- link libraries
     add_packages("ncurses")
 
     -- compiler flags
     add_cflags("-std=gnu++17")                  -- C++17 + GNU extensions
-    add_cflags("-Wall")                         -- Enable all warnings
-    add_cflags("-Wextra")                       -- Enable extra warnings
+    add_cflags("-Wall")                         -- Enable all warnings (not all warnings are enabled by -Wall)
+    add_cflags("-Wextra")                       -- Enable extra warnings (e.g. about unused variables)
     add_cflags("-Werror")                       -- Treat warnings as errors
-    add_cflags("-pedantic")                     -- Be pedantic
+    add_cflags("-pedantic")                     -- Be pedantic (strict) about C++ standard
     add_cflags("-pedantic-errors")              -- Treat pedantic warnings as errors
-    add_cflags("-Wformat=2")                    -- Check format strings
-    add_cflags("-Wwrite-strings")               -- Check for write strings
-    add_cflags("-Wswitch")                      -- Check for missing switch cases
-    add_cflags("-Wshadow")                      -- Check for shadowed variables
-    add_cflags("-Wpointer-arith")               -- Check for pointer arithmetic
-    add_cflags("-Wstrict-prototypes")           -- Check for strict prototypes
-    add_cflags("-Wmissing-prototypes")          -- Check for missing prototypes
-    add_cflags("-Wmissing-declarations")        -- Check for missing declarations
-    add_cflags("-Wnested-externs")              -- Check for nested externs
-    add_cflags("-Winline")                      -- Check for inlined functions
-    add_cflags("-Wredundant-decls")             -- Check for redundant declarations
+    add_cflags("-Wformat=2")                    -- Check format strings (this is a security feature)
+    add_cflags("-Wwrite-strings")               -- Warn when string literals are written to
+    add_cflags("-Wswitch")                      -- Warn about missing cases in switch statements
+    add_cflags("-Wshadow")                      -- Warn when a local variable shadows another local variable
+    add_cflags("-Wpointer-arith")               -- Warn about anything that depends on the size of a function or a function pointer
+    add_cflags("-Wstrict-prototypes")           -- Warn if a function is declared or defined without specifying the argument types
+    add_cflags("-Wmissing-prototypes")          -- Warn if a global function is defined without a previous declaration
+    add_cflags("-Wmissing-declarations")        -- Warn if a global function is defined without a previous declaration
+    add_cflags("-Wnested-externs")              -- Warn if an extern declaration is encountered within a function
+    add_cflags("-Winline")                      -- Warn if a function can not be inlined
+    add_cflags("-Wredundant-decls")             -- Warn if anything is declared more than once in the same scope
     add_cflags("-fsanitize=address")            -- Address sanitizer
     add_cflags("-fsanitize=leak")               -- Leak sanitizer
     add_cflags("-fsanitize=undefined")          -- Undefined behavior sanitizer
-    add_cflags("-fstack-protector")             -- Stack protector
+    add_cflags("-fstack-protector")             -- Enable stack canaries
 
     -- linker flags
     add_ldflags("-fsanitize=address")           -- Address sanitizer
