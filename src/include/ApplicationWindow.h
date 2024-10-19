@@ -11,10 +11,14 @@
 class ApplicationWindow : public Window
 {
 public:
-    ApplicationWindow ();
-    ~ApplicationWindow ();
+  ApplicationWindow ();
+  ~ApplicationWindow ();
 
-    // screen functions
-    void pause () { wgetch (this->screen); }
+  // screen functions
+  void
+  pause ()
+  {
+    wgetch (this->screen);
+  }
 };
 #endif
